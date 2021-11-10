@@ -36,41 +36,41 @@ else:
 if pixelsneeded <= imageheight*imagewidth:
     messagecount = 0
     #loop through pixels
-    for i in range(imageheight):
+    for row in range(imageheight):
         if messagecount>=lenmessage: break
         else:
-            for j in range(imagewidth):
+            for col in range(imagewidth):
                 if messagecount>=lenmessage: break
                 else:
-                    for k in range(0,3):
+                    for rgb in range(0,3):
                         if messagecount>=lenmessage: break
                         else:
                             #this prints pixel by pixel, r then g then b
-                            old = px[i,j][k]
+                            old = px[row,col][rgb]
                                 
                             #should the pixel color end in 0 or 1 (according to message)
                             if message[messagecount]=="1":
                                 #does the current pixel color end in 1? if px[i,j][k]%2==1: do nothing
-                                if px[i,j][k]%2==0:
+                                if px[row,col][rgb]%2==0:
                                     #change tuple into list
-                                    listcolorvalues=list(px[i,j])
+                                    listcolorvalues=list(px[row,col])
                                     
                                     #if it ends in 0, add 1 to color
-                                    listcolorvalues[k]+=1
+                                    listcolorvalues[rgb]+=1
 
                                     #change to tuple
-                                    px[i,j]=tuple(listcolorvalues)
+                                    px[row,col]=tuple(listcolorvalues)
                             elif message[messagecount]=="0":
                                 #does the current pixel color end in 0? if px[i,j][k]%2==0: do nothing
-                                if px[i,j][k]%2==1:
+                                if px[row,col][rgb]%2==1:
                                     #change tuple into list
-                                    listcolorvalues=list(px[i,j])
+                                    listcolorvalues=list(px[row,col])
                                     
                                     #if it ends in 0, subtract 1 to color
-                                    listcolorvalues[k]-=1
+                                    listcolorvalues[rgb]-=1
 
                                     #change to tuple
-                                    px[i,j]=tuple(listcolorvalues)
+                                    px[row,col]=tuple(listcolorvalues)
                             messagecount+=1
 
     im.save("samplestego.png", format="png")
