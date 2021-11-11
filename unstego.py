@@ -10,8 +10,8 @@ with Image.open(imagename) as im:
 
 #Get the size of the image (h x w)
 imagesize = im.size
-imageheight = imagesize[0]
-imagewidth = imagesize[1]
+imagewidth = imagesize[0]
+imageheight = imagesize[1]
 
 message=""
 nextcharacter=""

@@ -23,8 +23,8 @@ lenmessage = len(message)
 
 #Get the size of the image (h x w)
 imagesize = im.size
-imageheight = imagesize[0]
-imagewidth = imagesize[1]
+imagewidth = imagesize[0]
+imageheight = imagesize[1]
 
 #Check how many pixel changes are needed
 if lenmessage%3==0:
