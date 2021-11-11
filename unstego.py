@@ -18,10 +18,10 @@ nextcharacter=""
 count = 1
 nonchar = 0
 #loop through pixels
-for i in range(1):
-    if len(message)>500 or nonchar>5: break #if there are more than 5 non-character values in a row, break
+for i in range(imageheight):
+    if nonchar>5: break #if there are more than 5 non-character values in a row, break
     for j in range(imagewidth):
-        if len(message)>500 or nonchar>5: break
+        if nonchar>5: break
         else:
             for k in range(0,3):
                 #if we have enough pixels to create new character
