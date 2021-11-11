@@ -1,7 +1,6 @@
 from PIL import Image
 import binascii
 
-
 #Ask the user for the name of the cover image that is in the current directory.
 imagename = input("Image Name: ")
 
