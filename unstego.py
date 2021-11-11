@@ -16,36 +16,33 @@ imageheight = imagesize[1]
 message=""
 nextcharacter=""
 count = 1
-nonchar = 0
+goon = True
 #loop through pixels
-for i in range(imageheight):
-    if nonchar>5: break #if there are more than 5 non-character values in a row, break
-    for j in range(imagewidth):
-        if nonchar>5: break
-        else:
-            for k in range(0,3):
-                #if we have enough pixels to create new character
-                if count>8:
-                    nextcharacterbinary = int(nextcharacter,2)
-                    charactertoadd = chr(nextcharacterbinary)
-                    #if the character is between 0 and z
-                    if nextcharacterbinary>31 and nextcharacterbinary<128:
+for i in range(imagewidth):
+    if goon:
+        for j in range(imageheight):
+            if goon:
+                for k in range(3):
+                    if count>8: #if we have enough pixel information to produce a character
+                        nextcharacterbinary = int(nextcharacter,2) #get the integer value of that character
+                        charactertoadd = chr(nextcharacterbinary) #get the character value
                         #add to guess
                         message+=charactertoadd
+                        #check to make sure the last part is not equal to end message
+                        if message.endswith("endmessage"):
+                            goon = False
                         #reset count, nonchar, and next char
                         count=1
-                        nonchar=0
                         nextcharacter=""
-                    else:
-                        nonchar+=1
-                #if not enough pixels, add one to count, get the next value
-                count+=1
-                old = px[i,j][k]
-                value = str(old%2)
-                nextcharacter+=value
+                    #if not enough pixels, add one to count, get the next value
+                    count+=1
+                    old = px[i,j][k]
+                    value = str(old%2)
+                    nextcharacter+=value
+            else: break
+    else: break
 
-
-print("\n\nThe concealed message was:", message)
+print("\n\nThe concealed message was:", message[:-10])
 
 
             

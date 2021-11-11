@@ -6,6 +6,7 @@ imagename = input("Image Name: ")
 
 #Ask the user for the text input
 inputstring = input("Message: ")
+inputstring = inputstring + "endmessage"
 
 #Open the image
 with Image.open(imagename) as im:
@@ -14,7 +15,6 @@ with Image.open(imagename) as im:
 #Transform the input from string to binary
 inputbinary = ' '.join(format(ord(i), '08b') for i in inputstring)
 inputstring = "".join([chr(int(binary, 2)) for binary in inputbinary.split(" ")])
-print("Your message was:", inputstring)
                        
 message = ''.join(format(ord(i), '08b') for i in inputstring)
 
