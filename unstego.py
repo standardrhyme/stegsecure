@@ -42,7 +42,7 @@ for i in range(imagewidth):
             else: break
     else: break
 
-print("\n\nThe concealed message was:", message[:-10])
+print("\n- - - The concealed message was: {", message[:-10], "} - - -")
 
 
             
