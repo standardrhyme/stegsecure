@@ -1,12 +1,15 @@
 from PIL import Image
 import binascii
 
+# onlyLsb returns the LSB of x
 def onlyLsb(x):
-    return x & 0x1
+    return x & 1
 
+# exceptLsb returns all the bits other than the last one of x
 def exceptLsb(x):
     return x << 1
 
+# updateParams updates the provided parameters, depending on the LSB and MSBs
 def updateParams(u, v, params):
     uMsb = exceptLsb(u)
     uLsb = onlyLsb(u)
@@ -37,10 +40,13 @@ def analyzeSamplePairs(image):
         #         W  X  Y  Z
         params = [0, 0, 0, 0]
         P = 0
+
+        # Compute horizontal pairs
         for y in range(height):
             for x in range(0, width - 1, 2):
                 pair = [px[x, y], px[x + 1, y]]
 
+                # Extract the color value for the pair pixels
                 u = pair[0][color]
                 v = pair[1][color]
 
@@ -48,10 +54,12 @@ def analyzeSamplePairs(image):
 
                 P += 1
 
+        # Compute vertical pairs
         for y in range(0, height - 1, 2):
             for x in range(width):
                 pair = [px[x, y], px[x, y + 1]]
 
+                # Extract the color value for the pair pixels
                 u = pair[0][color]
                 v = pair[1][color]
 
@@ -68,6 +76,7 @@ def analyzeSamplePairs(image):
         if a == 0:
             x = c / b
 
+        # Solve for the largest root
         discriminant = b**2 - (4*a*c)
         if discriminant >= 0:
             posroot = ((-1*b) + discriminant**0.5) / (2*a)
