@@ -8,46 +8,41 @@ imagename = input("Enter the name of the image you would like to unstego: ")
 with Image.open(imagename) as im:
     px = im.load()
 
-#Get the size of the image (w x h)
+#Get the size of the image (h x w)
 imagesize = im.size
 imagewidth = imagesize[0]
 imageheight = imagesize[1]
 
 message=""
 nextcharacter=""
-count = 0
+count = 1
 goon = True
-pixelsadjusted=1
 #loop through pixels
-for i in range(imageheight):
+for i in range(imagewidth):
     if goon:
-        for j in range(imagewidth):
+        for j in range(imageheight):
             if goon:
                 for k in range(3):
-                    if goon:
-                        if count==8:
-                            pixelsadjusted = int(nextcharacter, 2)
-                            nextcharacter=''
-                        #if the message has been complete uncoded
-                        elif count>=((pixelsadjusted)*3)+8 and count%8==0:
+                    if count>8: #if we have enough pixel information to produce a character
+                        nextcharacterbinary = int(nextcharacter,2) #get the integer value of that character
+                        charactertoadd = chr(nextcharacterbinary) #get the character value
+                        #add to guess
+                        message+=charactertoadd
+                        #check to make sure the last part is not equal to end message
+                        if message.endswith("endmessage"):
                             goon = False
-                        elif count>8 and count%8==0:
-                            nextcharacterbinary = int(nextcharacter,2) #get the integer value of that character
-                            charactertoadd = chr(nextcharacterbinary) #get the character value
-                            #add to guess
-                            message+=charactertoadd
-                            #reset count, nonchar, and next char
-                            nextcharacter=""
-                        #if not enough pixels, add one to count, get the next value
-                        count+=1
-                        old = px[j,i][k]
-                        value = str(old%2)
-                        nextcharacter+=value
-                    else: break
+                        #reset count, nonchar, and next char
+                        count=1
+                        nextcharacter=""
+                    #if not enough pixels, add one to count, get the next value
+                    count+=1
+                    old = px[i,j][k]
+                    value = str(old%2)
+                    nextcharacter+=value
             else: break
-    else: break       
+    else: break
 
-print("\n- - - The concealed message was: {", message, "} - - -")
+print("\n- - - The concealed message was: {", message[:-10], "} - - -")
 
 
             
