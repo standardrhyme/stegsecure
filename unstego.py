@@ -23,7 +23,7 @@ for i in range(imagewidth):
         for j in range(imageheight):
             if goon:
                 for k in range(3):
-                    if count>8: #if we have enough pixel information to produce a character
+                    if count==9: #if we have enough pixel information to produce a character
                         nextcharacterbinary = int(nextcharacter,2) #get the integer value of that character
                         charactertoadd = chr(nextcharacterbinary) #get the character value
                         #add to guess
@@ -31,6 +31,7 @@ for i in range(imagewidth):
                         #check to make sure the last part is not equal to end message
                         if message.endswith("endmessage"):
                             goon = False
+                            break
                         #reset count, nonchar, and next char
                         count=1
                         nextcharacter=""
