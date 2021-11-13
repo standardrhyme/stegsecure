@@ -1,7 +1,7 @@
 from PIL import Image
 import binascii
 
-def stegoImage(image, binstring, output):
+def stegoImage(image, binstring, output, quiet=False):
     px = image.load()
     #Get the size of the image (h x w)
     imagesize = image.size
@@ -19,7 +19,8 @@ def stegoImage(image, binstring, output):
 
     #If the number of pixels needed is less than the number of pixels of the image, the message will fit.
     if pixelsneeded > imageheight*imagewidth:
-        print("- - - The message would need to alter:", pixelsneeded,"pixels. ~ Therefore, the message will not fit in the currently selected image. Try again. - - -")
+        if not quiet:
+            print("- - - The message would need to alter:", pixelsneeded,"pixels. ~ Therefore, the message will not fit in the currently selected image. Try again. - - -")
         return False
 
     #Keep track of how many bits have been read into the image pixels
@@ -47,11 +48,13 @@ def stegoImage(image, binstring, output):
                 #Move forward in the message
                 messagecount+=1
 
-    print("\n- - - The image pixels have been altered to conceal the input message. The image will now save. - - -")
+    if not quiet:
+        print("\n- - - The image pixels have been altered to conceal the input message. The image will now save. - - -")
     #Save the image
     image.save(output, format="png")
     #Let the user know the image has been saved
-    print("- - - The rendered image has been saved as 'samplestego.png' in the current directory. Thank you. - - - ")
+    if not quiet:
+        print("- - - The rendered image has been saved as 'samplestego.png' in the current directory. Thank you. - - - ")
 
     return True
 

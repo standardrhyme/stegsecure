@@ -1,6 +1,3 @@
-from PIL import Image
-import binascii
-
 # onlyLsb returns the LSB of x
 def onlyLsb(x):
     return x & 1
@@ -97,6 +94,8 @@ def analyzeSamplePairs(image):
     return probability > 0.5, probability
 
 def main():
+    from PIL import Image
+
     # Ask the user what image they would like to analyze
     imagename = input("Enter the name of the image you would like to analyze: ")
 
@@ -109,10 +108,6 @@ def main():
             print("This is probably a stego image.")
         else:
             print("This is probably not a stego image.")
-
-        size_bits = probability * im.size[0] * im.size[1] * 3
-        size_letters = size_bits // 8
-        print("Message size:", size_bits, "bits,", size_letters, "letters")
 
 if __name__ == "__main__":
     main()
