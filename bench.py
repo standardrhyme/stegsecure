@@ -17,8 +17,13 @@ with Image.open(IMAGE) as im:
     letters = bits // 8
     letters_end = letters - len(END)
 
+    print("Letters\tBits\t% of file stegoed\tStego probability")
+
     for l in range(10, letters_end, letters_end // 20):
-        total_prob = 0
+        bits_total = bits * 8
+        bits_used = l * 8
+        message_percent = bits_used / bits_total
+
         for _ in range(TRIALS):
             # from https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
             message = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(l))
@@ -34,16 +39,4 @@ with Image.open(IMAGE) as im:
 
             with Image.open(OUTPUT) as out:
                 _, probability = samplepairs.analyzeSamplePairs(out)
-                total_prob += probability
-
-        bits_total = bits * 8
-        bits_used = l * 8
-        print(l, bits_used)
-        message_percent = round((bits_used / bits_total) * 100, 2)
-        avg_prob = total_prob / TRIALS
-        print("Average probability for a {}% stegoed image: {}".format(message_percent, round(probability, 2)))
-        if avg_prob > 0.5:
-            print("This is probably a stego image.")
-        else:
-            print("This is probably not a stego image.")
-
+                print("\t".join([str(a) for a in [l, bits_used, message_percent, probability]]))
