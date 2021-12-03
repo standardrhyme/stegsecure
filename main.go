@@ -19,7 +19,7 @@ func testInterception() {
 		fmt.Println("[DEBUG]", msg)
 	}
 
-	err = fs.Mount("mnt")
+	err = fs.Mount("Downloads")
 	if err != nil {
 		log.Fatal(err)
 	}
