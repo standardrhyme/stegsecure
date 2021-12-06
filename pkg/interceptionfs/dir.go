@@ -42,31 +42,19 @@ func (d *Dir) Attr(ctx context.Context, a *fuse.Attr) error {
 	return nil
 }
 
-// LookupNode finds a child Node by name.
-func (d *Dir) LookupNode(name string) (Node, *NodeAttr, error) {
-	fNode, ok := d.children[name]
-	if !ok {
-		return nil, nil, syscall.ENOENT
-	}
-
-	inum := fNode.Inum()
-
-	node, err := d.fs.GetNode(inum)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return fNode, node, syscall.ENOENT
-}
-
 // Lookup finds a child Node by name, setting additional details.
 func (d *Dir) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.LookupResponse) (fs.Node, error) {
-	fNode, node, err := d.LookupNode(req.Name)
+	fNode, ok := d.children[req.Name]
+	if !ok {
+		return nil, syscall.ENOENT
+	}
+
+	node, err := fNode.GetNode()
 	if err != nil {
 		return nil, err
 	}
 
-	resp.Node = fuse.NodeID(node.attr.Inode)
+	resp.Node = fuse.NodeID(fNode.Inum())
 	resp.Attr = node.attr
 	resp.EntryValid = node.attr.Valid
 
@@ -144,8 +132,6 @@ func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error
 	d.fs.nodes[inum] = newNode
 	d.children[req.Name] = newDir
 
-	fmt.Println(newDir)
-
 	return newDir, nil
 }
 
@@ -192,7 +178,7 @@ func (d *Dir) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.Cr
 func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Node) error {
 	node, ok := d.children[req.OldName]
 	if !ok {
-		return fmt.Errorf("Node does not exist.")
+		return syscall.ENOENT
 	}
 
 	node.SetName(req.NewName)
@@ -205,7 +191,7 @@ func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Nod
 	} else {
 		newParent, ok := newDir.(*Dir)
 		if !ok {
-			return fmt.Errorf("New parent is not a directory.")
+			return syscall.ENOENT
 		}
 
 		newParent.children[req.NewName] = d.children[req.OldName]
@@ -217,13 +203,13 @@ func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Nod
 
 // Remove deletes child nodes.
 func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
-	_, node, err := d.LookupNode(req.Name)
-	if err != nil {
-		return err
+	node, ok := d.children[req.Name]
+	if !ok {
+		return syscall.ENOENT
 	}
 
 	delete(d.children, req.Name)
-	delete(d.fs.nodes, node.GetInum())
+	delete(d.fs.nodes, node.Inum())
 
 	return nil
 }

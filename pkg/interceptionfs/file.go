@@ -2,8 +2,7 @@ package interceptionfs
 
 import (
 	"context"
-	"fmt"
-	"os"
+	// "os"
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
@@ -40,11 +39,11 @@ func (f *File) Attr(ctx context.Context, a *fuse.Attr) error {
 		return err
 	}
 
+	// Remove all read permissions.
 	*a = node.attr
-	mask := ^(0444)
-	a.Mode &= os.FileMode(mask)
+	// mask := ^(0444)
+	// a.Mode &= os.FileMode(mask)
 
-	fmt.Println(a)
 	return nil
 }
 
