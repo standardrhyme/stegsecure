@@ -20,8 +20,8 @@ func StopAndDrain(t *time.Timer) {
 	}
 }
 
-func DebouncedNotifier(finally func(*Node), d time.Duration) func(*Node) {
-	var p *Node
+func DebouncedNotifier(finally func(Node), d time.Duration) func(Node) {
+	var p Node
 	pp := &p
 
 	t := time.AfterFunc(d, func() {
@@ -29,7 +29,7 @@ func DebouncedNotifier(finally func(*Node), d time.Duration) func(*Node) {
 	})
 	StopAndDrain(t)
 
-	return func(n *Node) {
+	return func(n Node) {
 		StopAndDrain(t)
 		*pp = n
 		t.Reset(d)

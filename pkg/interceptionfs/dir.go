@@ -16,15 +16,23 @@ type Dir struct {
 
 	name     string
 	parent   *Dir
-	children map[string]fs.Node
+	children map[string]Node
 }
 
-func (d *Dir) GetNode() (*Node, error) {
+func (d *Dir) FS() *FS { return d.fs }
+func (d *Dir) Inum() Inum { return d.inum }
+func (d *Dir) Name() string { return d.name }
+func (d *Dir) SetName(newName string) { d.name = newName }
+func (d *Dir) Parent() *Dir { return d.parent }
+func (d *Dir) SetParent(newDir *Dir) { d.parent = newDir }
+
+// GetNode gets the NodeAttr for the current Dir.
+func (d *Dir) GetNode() (*NodeAttr, error) {
 	return d.fs.GetNode(d.inum)
 }
 
+// Attr returns the attributes for the current Dir.
 func (d *Dir) Attr(ctx context.Context, a *fuse.Attr) error {
-	fmt.Println("getattr", d.inum)
 	node, err := d.GetNode()
 	if err != nil {
 		return err
@@ -34,31 +42,24 @@ func (d *Dir) Attr(ctx context.Context, a *fuse.Attr) error {
 	return nil
 }
 
-func (d *Dir) LookupNode(name string) (fs.Node, *Node, error) {
-	for nodeName, fNode := range d.children {
-		if name == nodeName {
-			var inum Inum
-			switch v := fNode.(type) {
-			case *Dir:
-				inum = v.inum
-			case *File:
-				inum = v.inum
-			default:
-				return nil, nil, fmt.Errorf("Unexpected child type.")
-			}
-
-			node, err := d.fs.GetNode(inum)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			return fNode, node, nil
-		}
+// LookupNode finds a child Node by name.
+func (d *Dir) LookupNode(name string) (Node, *NodeAttr, error) {
+	fNode, ok := d.children[name]
+	if !ok {
+		return nil, nil, syscall.ENOENT
 	}
 
-	return nil, nil, syscall.ENOENT
+	inum := fNode.Inum()
+
+	node, err := d.fs.GetNode(inum)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return fNode, node, syscall.ENOENT
 }
 
+// Lookup finds a child Node by name, setting additional details.
 func (d *Dir) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.LookupResponse) (fs.Node, error) {
 	fNode, node, err := d.LookupNode(req.Name)
 	if err != nil {
@@ -72,6 +73,7 @@ func (d *Dir) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.Lo
 	return fNode, nil
 }
 
+// ReadDirAll lists all the entries in a directory.
 func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	node, err := d.GetNode()
 	if err != nil {
@@ -82,25 +84,16 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	entries := make([]fuse.Dirent, 0, len(d.children))
 
 	for name, fNode := range d.children {
-		var inum Inum
-		switch v := fNode.(type) {
-		case *Dir:
-			inum = v.inum
-		case *File:
-			inum = v.inum
-		default:
-			return nil, fmt.Errorf("Unexpected child type.")
-		}
-
-		node, err := d.fs.GetNode(inum)
+		inum := fNode.Inum()
+		details, err := fNode.GetNode()
 		if err != nil {
 			return nil, err
 		}
 
 		var typ fuse.DirentType
-		if node.attr.Mode.IsDir() {
+		if details.attr.Mode.IsDir() {
 			typ = fuse.DT_Dir
-		} else if (node.attr.Mode & os.ModeSymlink) != 0 {
+		} else if (details.attr.Mode & os.ModeSymlink) != 0 {
 			typ = fuse.DT_Link
 		} else {
 			typ = fuse.DT_File
@@ -116,8 +109,8 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	return entries, nil
 }
 
+// Mkdir creates a new child directory under the current.
 func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error) {
-	fmt.Println("MKDIR")
 	node, err := d.GetNode()
 	if err != nil {
 		return nil, err
@@ -134,10 +127,10 @@ func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error
 		inum:     inum,
 		name:     req.Name,
 		parent:   d,
-		children: make(map[string]fs.Node),
+		children: make(map[string]Node),
 	}
 
-	newNode := &Node{
+	newNode := &NodeAttr{
 		fs: d.fs,
 		attr: fuse.Attr{
 			Mode: req.Mode | os.ModeDir,
@@ -156,8 +149,8 @@ func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error
 	return newDir, nil
 }
 
+// Create creates a new child file under the current directory.
 func (d *Dir) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.CreateResponse) (fs.Node, fs.Handle, error) {
-	fmt.Println("create")
 	node, err := d.GetNode()
 	if err != nil {
 		return nil, nil, err
@@ -178,7 +171,7 @@ func (d *Dir) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.Cr
 		data:   make([]byte, 0),
 	}
 
-	newNode := &Node{
+	newNode := &NodeAttr{
 		fs: d.fs,
 		attr: fuse.Attr{
 			Mode: req.Mode,
@@ -195,20 +188,14 @@ func (d *Dir) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.Cr
 	return newFile, &FileHandle{newFile}, nil
 }
 
+// Rename renames and/or moves child nodes.
 func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Node) error {
 	node, ok := d.children[req.OldName]
 	if !ok {
 		return fmt.Errorf("Node does not exist.")
 	}
 
-	switch n := node.(type) {
-	case *Dir:
-		n.name = req.NewName
-	case *File:
-		n.name = req.NewName
-	default:
-		return fmt.Errorf("Invalid node type.")
-	}
+	node.SetName(req.NewName)
 
 	newParentInum := Inum(req.NewDir)
 
@@ -228,24 +215,15 @@ func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Nod
 	return nil
 }
 
+// Remove deletes child nodes.
 func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
-	node, ok := d.children[req.Name]
-	if !ok {
-		return fmt.Errorf("Node does not exist.")
-	}
-
-	var inum Inum
-	switch n := node.(type) {
-	case *Dir:
-		inum = n.inum
-	case *File:
-		inum = n.inum
-	default:
-		return fmt.Errorf("Invalid node type.")
+	_, node, err := d.LookupNode(req.Name)
+	if err != nil {
+		return err
 	}
 
 	delete(d.children, req.Name)
-	delete(d.fs.nodes, inum)
+	delete(d.fs.nodes, node.GetInum())
 
 	return nil
 }

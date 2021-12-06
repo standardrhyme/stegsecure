@@ -7,23 +7,45 @@ import (
 	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
 )
 
+var (
+	DEBUG = false
+)
+
 func testInterception() {
-	fs, err := interceptionfs.Init(func(n *interceptionfs.Node) {
-		fmt.Println("file was modified:", n)
+	// Initialize the filesystem
+	fs, err := interceptionfs.Init(func(n interceptionfs.Node) {
+		node, err := n.GetNode()
+		if err != nil {
+			return
+		}
+
+		fmt.Println("file was modified:", n.Name(), node)
+
+		fh, ok := n.(*interceptionfs.FileHandle)
+		if !ok {
+			// Not a file handle
+			return
+		}
+
+		fmt.Println(fh.File)
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fs.Debug = func(msg interface{}) {
-		fmt.Println("[DEBUG]", msg)
+	if DEBUG {
+		fs.Debug = func(msg interface{}) {
+			fmt.Println("[DEBUG]", msg)
+		}
 	}
 
+	// Mount the filesystem to the Downloads folder
 	err = fs.Mount("Downloads")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Serve the filesystem (attach the mount to the FS struct) and watch for errors.
 	errchan := make(chan error)
 	err = fs.Serve(errchan)
 	if err != nil {

@@ -11,6 +11,8 @@ type FileHandle struct {
 	*File
 }
 
+// InternalRead allows internal access to the bytes in the file, not guarded by
+// passthrough or cleaned.
 func (fh *FileHandle) InternalRead(ctx context.Context, req *fuse.ReadRequest, resp *fuse.ReadResponse) error {
 	node, err := fh.GetNode()
 	if err != nil {
@@ -29,6 +31,7 @@ func (fh *FileHandle) InternalRead(ctx context.Context, req *fuse.ReadRequest, r
 	return nil
 }
 
+// Read allows file system clients to read the file, if it has been cleaned.
 func (fh *FileHandle) Read(ctx context.Context, req *fuse.ReadRequest, resp *fuse.ReadResponse) error {
 	if fh.passthrough {
 		// passthrough read
@@ -39,6 +42,7 @@ func (fh *FileHandle) Read(ctx context.Context, req *fuse.ReadRequest, resp *fus
 	return fmt.Errorf("No permission")
 }
 
+// Write modifies the contents of the file.
 func (fh *FileHandle) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.WriteResponse) error {
 	node, err := fh.GetNode()
 	if err != nil {
@@ -63,7 +67,7 @@ func (fh *FileHandle) Write(ctx context.Context, req *fuse.WriteRequest, resp *f
 	fh.data = append(fh.data, dataPost...)
 	node.attr.Size = fileEndIndex
 
-	go fh.fs.notifier(node)
+	go fh.fs.notifier(fh)
 
 	return nil
 }

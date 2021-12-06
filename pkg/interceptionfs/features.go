@@ -1,3 +1,8 @@
+/*
+ * This file describes the fuse features to include, with static checks to
+ * ensure they were implemeneted correctly.
+ */
+
 package interceptionfs
 
 import (
@@ -10,6 +15,7 @@ var _ = fs.FS(&FS{})
 
 // Dir
 
+var _ = Node(&Dir{})
 var _ = fs.Node(&Dir{})
 var _ = fs.NodeRequestLookuper(&Dir{})
 var _ = fs.HandleReadDirAller(&Dir{})
@@ -24,6 +30,7 @@ var _ = fs.NodeRemover(&Dir{})
 
 // File
 
+var _ = Node(&File{})
 var _ = fs.Node(&File{})
 
 // var _ = fs.NodeReadlinker(&File{})
