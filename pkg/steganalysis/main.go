@@ -1,7 +1,7 @@
-package main
+package steganalysis
 
 import (
-	"bufio"
+	// "bufio"
 	"bytes"
 	"fmt"
 	"image"
@@ -10,11 +10,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
 )
 
 func runPython() {
 	fmt.Println("")
-	cmd := exec.Command("python3", "../../python-scripts/samplepairs.py", "testpng.png")
+	cmd := exec.Command("python3", "./python-scripts/samplepairs.py", "testpng.png")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	log.Println(cmd.Run())
@@ -50,5 +52,17 @@ func AnalyzeCreate(b []byte) {
 }
 
 func Analyze(n interceptionfs.Node) {
-	AnalyzeCreate(n.Name.data)
+	fh, ok := n.(*interceptionfs.FileHandle)
+	if !ok {
+		// Not a file handle
+		return
+	}
+
+	data, err := fh.InternalReadAll()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	AnalyzeCreate(data)
 }

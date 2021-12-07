@@ -6,30 +6,16 @@ import (
 	"os"
 
 	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
+	"github.com/standardrhyme/stegsecure/pkg/steganalysis"
 )
 
 var (
-	DEBUG = true
+	DEBUG = false
 )
 
 func testInterception() {
 	// Initialize the filesystem
-	fs, err := interceptionfs.Init(func(n interceptionfs.Node) {
-		node, err := n.GetNode()
-		if err != nil {
-			return
-		}
-
-		fmt.Println("file was modified:", n.Name(), node)
-
-		fh, ok := n.(*interceptionfs.FileHandle)
-		if !ok {
-			// Not a file handle
-			return
-		}
-
-		fmt.Println(fh.File)
-	})
+	fs, err := interceptionfs.Init(steganalysis.Analyze)
 	if err != nil {
 		log.Fatal(err)
 	}
