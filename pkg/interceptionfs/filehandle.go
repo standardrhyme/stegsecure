@@ -2,8 +2,8 @@ package interceptionfs
 
 import (
 	"context"
-	"os"
 	"fmt"
+	"os"
 	"syscall"
 
 	"bazil.org/fuse"

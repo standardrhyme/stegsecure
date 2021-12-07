@@ -24,7 +24,7 @@ type FS struct {
 	root      fs.Node
 	nodes     map[Inum]*NodeAttr
 	notifiers map[Inum]*func(Node)
-	nextInum Inum
+	nextInum  Inum
 	notifier  func(Node)
 
 	nextPassInum Inum
@@ -37,7 +37,7 @@ func Init(notifier func(Node)) (*FS, error) {
 	f := &FS{
 		nodes:     make(map[Inum]*NodeAttr),
 		notifiers: make(map[Inum]*func(Node)),
-		nextInum: 1,
+		nextInum:  1,
 		notifier:  notifier,
 
 		nextPassInum: math.MaxUint64,
@@ -202,15 +202,21 @@ func (f *FS) GetNotifier(inum Inum) func(Node) {
 	return n
 }
 
-func (f *FS) Exists (relPath string) bool {
+func (f *FS) Exists(relPath string) bool {
 	_, err := os.Stat(relPath)
 	return !os.IsNotExist(err)
 }
 
 func (f *FS) RemoveIfNotExist(n Node) bool {
-	if n.Inum() == f.rootInum { return false }
-	if !n.Passthrough() { return false }
-	if f.Exists(n.GetRealPath()) { return false }
+	if n.Inum() == f.rootInum {
+		return false
+	}
+	if !n.Passthrough() {
+		return false
+	}
+	if f.Exists(n.GetRealPath()) {
+		return false
+	}
 
 	delete(n.Parent().children, n.Name())
 	delete(f.passNodes, n.Inum())

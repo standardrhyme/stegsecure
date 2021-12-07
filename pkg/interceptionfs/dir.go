@@ -30,7 +30,9 @@ func (d *Dir) Parent() *Dir           { return d.parent }
 func (d *Dir) SetParent(newDir *Dir)  { d.parent = newDir }
 func (d *Dir) Passthrough() bool      { return d.passthrough }
 func (d *Dir) GetRelPath() string {
-	if d.inum == d.fs.rootInum { return "" }
+	if d.inum == d.fs.rootInum {
+		return ""
+	}
 	return d.parent.GetRelPath() + "/" + d.name
 }
 func (d *Dir) GetRealPath() string { return d.fs.GetRealPath(d.GetRelPath()) }
@@ -90,7 +92,7 @@ func (d *Dir) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.Lo
 	if err != nil {
 		return nil, err
 	}
-	
+
 	fmt.Println("XXXXXXXXX2")
 
 	resp.Node = fuse.NodeID(fNode.Inum())
@@ -379,19 +381,19 @@ func (d *Dir) UpdatePassthroughChildren() error {
 
 			if fileInfo.IsDir() {
 				newNode = &Dir{
-					fs:       d.fs,
-					inum:     inum,
-					name:     name,
-					parent:   d,
-					children: make(map[string]Node),
+					fs:          d.fs,
+					inum:        inum,
+					name:        name,
+					parent:      d,
+					children:    make(map[string]Node),
 					passthrough: true,
 				}
 			} else {
 				newNode = &File{
-					fs:       d.fs,
-					inum:     inum,
-					name:     name,
-					parent:   d,
+					fs:          d.fs,
+					inum:        inum,
+					name:        name,
+					parent:      d,
 					passthrough: true,
 				}
 			}
