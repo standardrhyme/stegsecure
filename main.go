@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
 )
 
 var (
-	DEBUG = false
+	DEBUG = true
 )
 
 func testInterception() {
@@ -40,7 +41,7 @@ func testInterception() {
 	}
 
 	// Mount the filesystem to the Downloads folder
-	err = fs.Mount("Downloads")
+	err = fs.Mount("testdir/Downloads")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,5 +63,9 @@ func testInterception() {
 }
 
 func main() {
+	if os.Geteuid() != 0 {
+		log.Fatalln("Must be run as root!")
+	}
+
 	testInterception()
 }
