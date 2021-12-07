@@ -278,12 +278,8 @@ func (d *Dir) Rename(ctx context.Context, req *fuse.RenameRequest, newDir fs.Nod
 }
 
 // Remove deletes child nodes.
-func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
-	if d.fs.RemoveIfNotExist(d) {
-		return syscall.ENOENT
-	}
-
-	node, ok := d.children[req.Name]
+func (d *Dir) InternalRemove(name string) error {
+	node, ok := d.children[name]
 	if !ok {
 		return syscall.ENOENT
 	}
@@ -294,19 +290,29 @@ func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 
 	var m map[Inum]*NodeAttr
 
+	if err := os.Remove(node.GetRealPath()); !os.IsNotExist(err){
+		return err
+	}
+
 	if node.Passthrough() {
-		if err := os.Remove(node.GetRealPath()); err != nil {
-			return err
-		}
 		m = d.fs.passNodes
 	} else {
 		m = d.fs.nodes
 	}
 
-	delete(d.children, req.Name)
+	delete(d.children, name)
 	delete(m, node.Inum())
 
 	return nil
+}
+
+// Remove deletes child nodes.
+func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
+	if d.fs.RemoveIfNotExist(d) {
+		return syscall.ENOENT
+	}
+
+	return d.InternalRemove(req.Name)
 }
 
 func (d *Dir) ResolvePassthrough() error {

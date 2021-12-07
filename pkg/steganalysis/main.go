@@ -1,42 +1,44 @@
 package steganalysis
 
 import (
-	// "bufio"
 	"bytes"
 	"fmt"
 	"image"
 	"image/png"
-	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
 )
 
-func runPython() {
+// Returns whether the file has steganographic content.
+func runPython(path string) bool {
 	fmt.Println("")
-	cmd := exec.Command("python3", "./python-scripts/samplepairs.py", "testpng.png")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	log.Println(cmd.Run())
-}
-
-func AnalyzeCreate(b []byte) {
-	err := ioutil.WriteFile("test", b, 0755)
+	out, err := exec.Command("python3", "./python-scripts/samplepairs.py", path).Output()
 	if err != nil {
-		fmt.Printf("Unable to write file: %v", err)
+		return false
 	}
 
+	parts := strings.Split(strings.TrimSpace(string(out)), "\n")
+	output := parts[len(parts) - 1]
+	fmt.Print(string(out))
+	return output == "TRUE"
+}
+
+// Returns whether the file has steganographic content.
+func AnalyzeCreate(b []byte) bool {
 	// convert []byte to image for saving to file
 	img, _, _ := image.Decode(bytes.NewReader(b))
 
 	//save the imgByte to file
-	out, err := os.Create("./testpng.png")
+	out, err := os.CreateTemp("", "*")
+	defer os.Remove(out.Name())
+	defer out.Close()
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return false
 	}
 
 	err = png.Encode(out, img)
@@ -46,9 +48,10 @@ func AnalyzeCreate(b []byte) {
 		os.Exit(1)
 	}
 
-	//Run python script on file
-	runPython()
+	fmt.Println(out.Name())
 
+	//Run python script on file
+	return runPython(out.Name())
 }
 
 func Analyze(n interceptionfs.Node) {
@@ -58,12 +61,24 @@ func Analyze(n interceptionfs.Node) {
 		return
 	}
 
+	fmt.Println()
+	fmt.Println("===========")
 	fmt.Println("FILE NAME: ", fh.Name())
+
+	if !strings.HasSuffix(fh.Name(), ".png") {
+		fh.File.Release()
+		return
+	}
+
 	data, err := fh.InternalReadAll()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 
-	AnalyzeCreate(data)
+	if AnalyzeCreate(data) {
+		fmt.Println("SANITIZE")
+	}
+
+	fh.File.Release()
 }

@@ -114,8 +114,10 @@ def main():
         print("Probability of being a stego image:", probability)
         if result:
             print("This is probably a stego image.")
+            print("TRUE")
         else:
             print("This is probably not a stego image.")
+            print("FALSE")
 
 if __name__ == "__main__":
     main()

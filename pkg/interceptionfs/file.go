@@ -2,6 +2,7 @@ package interceptionfs
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"syscall"
 
@@ -91,4 +92,58 @@ func (f *File) Open(ctx context.Context, req *fuse.OpenRequest, resp *fuse.OpenR
 	}
 
 	return &FileHandle{f, file}, nil
+}
+
+func (f *File) Release() error {
+	node, err := f.GetNode()
+	if err != nil {
+		return err
+	}
+
+	inum := f.fs.nextPassInum.Decrement()
+	if _, ok := f.fs.passNodes[inum]; ok {
+		return fmt.Errorf("Out of inodes")
+	}
+
+	path := f.GetRealPath()
+
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	err = os.Chmod(path, node.attr.Mode.Perm())
+	if err != nil {
+		return err
+	}
+
+	err = os.Chown(path, int(node.attr.Uid), int(node.attr.Gid))
+	if err != nil {
+		return err
+	}
+
+	err = os.Chtimes(path, node.attr.Atime, node.attr.Ctime)
+	if err != nil {
+		return err
+	}
+
+	_, err = file.Write(f.data)
+	if err != nil {
+		return err
+	}
+
+	oldInum := f.inum
+
+	f.inum = inum
+	f.data = nil
+
+	f.cleaned = false
+	f.passthrough = true
+
+	f.fs.passNodes[inum] = node
+	delete(f.fs.nodes, oldInum)
+
+	return nil
 }
