@@ -79,21 +79,15 @@ func (d *Dir) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.Lo
 		return nil, err
 	}
 
-	fmt.Println("LOOKUP", d.children)
-
 	fNode, ok := d.children[req.Name]
 	if !ok {
 		return nil, syscall.ENOENT
 	}
 
-	fmt.Println("XXXXXXXXXX", fNode.Inum(), d.fs.passNodes)
-
 	node, err := fNode.GetNode()
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("XXXXXXXXX2")
 
 	resp.Node = fuse.NodeID(fNode.Inum())
 	resp.Attr = node.attr
@@ -112,7 +106,6 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 		return nil, err
 	}
 
-	fmt.Println("READDIR", d)
 	node, err := d.GetNode()
 	if err != nil {
 		return nil, err

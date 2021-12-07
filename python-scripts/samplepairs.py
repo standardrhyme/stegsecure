@@ -99,7 +99,7 @@ def analyzeSamplePairs(image):
 def main():
     from PIL import Image
     # Ask the user what image they would like to analyze
-    print("FILE NAME: ", sys.argv[1])
+    # print("FILE NAME: ", sys.argv[1])
     if os.path.isfile(sys.argv[1]) == False:
         print("The file does not exist.")
         sys.exit(1)

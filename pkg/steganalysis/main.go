@@ -58,6 +58,7 @@ func Analyze(n interceptionfs.Node) {
 		return
 	}
 
+	fmt.Println("FILE NAME: ", fh.Name())
 	data, err := fh.InternalReadAll()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

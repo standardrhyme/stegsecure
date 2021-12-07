@@ -97,9 +97,6 @@ func (fh *FileHandle) Write(ctx context.Context, req *fuse.WriteRequest, resp *f
 		oldInum := fh.inum
 		inum := fh.fs.nextInum.Increment()
 		if _, ok := fh.fs.nodes[inum]; ok {
-			fmt.Println()
-			fmt.Println("out of inodes")
-			fmt.Println()
 			return fmt.Errorf("Out of inodes.")
 		}
 
@@ -107,10 +104,6 @@ func (fh *FileHandle) Write(ctx context.Context, req *fuse.WriteRequest, resp *f
 		if err != nil {
 			return err
 		}
-
-		fmt.Println()
-		fmt.Println(data)
-		fmt.Println()
 
 		fh.inum = inum
 		fh.data = data
