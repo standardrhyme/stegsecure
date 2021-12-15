@@ -1,25 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"image"
+	imcolor "image/color"
 	"log"
 	"math"
 	"os"
 )
 
 // onlyLsb returns the LSB of x
-func onlyLsb(x int) int {
+func onlyLsb(x uint32) uint32 {
 	return x & 1
 }
 
 // exceptLsb returns all the bits other than the last one of x
-func exceptLsb(x int) int {
+func exceptLsb(x uint32) uint32 {
 	return x << 1
 }
 
 // updateParams updates the provided parameters, depending on the LSB and MSBs
-func updateParams(u int, v int, params int[]) {
+func updateParams(u uint32, v uint32, params [4]float64) {
 	uMsb := exceptLsb(u)
 	uLsb := onlyLsb(u)
 	vMsb := exceptLsb(v)
@@ -42,28 +44,36 @@ func updateParams(u int, v int, params int[]) {
 	if ((vLsb == 0) && (u > v)) || ((vLsb == 1) && (u < v)) {
 		params[2]++
 	}
+}
 
+func getColorComponent(color imcolor.Color, index int) uint32 {
+	r, g, b, a := color.RGBA()
+	switch index {
+	case 0:
+		return r
+	case 1:
+		return g
+	case 2:
+		return b
+	default:
+		return a
+	}
 }
 
 func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) {
 	// Based off of https://github.com/b3dk7/StegExpose/blob/master/SamplePairs.java
-	avg := 0
+	avg := float64(0)
 	for color := 0; color < 3; color++ {
-
-		//         W  X  Y  Z
-		params := [4]int{0,0,0,0} // *** Go tuple issue ***
-		P := 0 // *** Go tuple issue ***
-		// pair := make([][]uint8{} // *** Go tuple issue ***
-		pair := [][]int[] // *** Go tuple issue ***
+		//                   W X Y Z
+		params := [4]float64{0,0,0,0}
+		P := float64(0)
 
 		// Compute horizontal pairs
 		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 			for x := bounds.Min.X; x < bounds.Max.X - 1; x += 2 {
-				pair := {x, y}, {x + 1, y} // *** Go tuple issue ***
-
 				// Extract the color value for the pair pixels
-				u := pair[0][color]
-				v := pair[1][color]
+				u := getColorComponent(im.At(x, y), color)
+				v := getColorComponent(im.At(x+1, y), color)
 
 				updateParams(u, v, params)
 
@@ -74,11 +84,9 @@ func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) 
 		// Compute vertical pairs
 		for y := bounds.Min.Y; y < bounds.Max.Y - 1; y += 2 {
 			for x := bounds.Min.X; x < bounds.Max.X; x++ {
-				pair := {{x, y}, {x, y + 1}} // *** Go tuple issue ***
-
 				// Extract the color value for the pair pixels
-				u := pair[0][color]
-				v := pair[1][color]
+				u := getColorComponent(im.At(x, y), color)
+				v := getColorComponent(im.At(x, y+1), color)
 
 				updateParams(u, v, params)
 
@@ -92,41 +100,52 @@ func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) 
 		Y := params[2]
 		Z := params[3]
 
-		a := float64((W + Z) / 2.0)
-		b := float64((2.0 * X) - P)
-		c := float64(Y - X)
+		a := (W+Z) / 2.0
+		b := (2*X) - P
+		c := Y-X
+
+		var x float64
 
 		if a == 0 {
-			x := c / b
+			x = c / b
 		}
 
 		// Solve for the largest root
-		discriminant := math.Pow(b,2.0) - (4.0*a*c)
+		discriminant := math.Pow(b, 2) - (4*a*c)
 		if discriminant >= 0 {
-			posRoot := ((-1.0*b) + math.Pow(discriminant, 0.5)) / (2.0*a)
-			negRoot := ((-1.0*b) - math.Pow(discriminant, 0.5)) / (2.0*a)
+			posRoot := ((-1*b) + math.Sqrt(discriminant)) / (2.0*a)
+			negRoot := ((-1*b) - math.Sqrt(discriminant)) / (2.0*a)
 
 			if math.Abs(posRoot) <= math.Abs(negRoot) {
-				x := posRoot
-				else {
-				x := negRoot
-				}
+				x = posRoot
+			} else {
+				x = negRoot
 			}
-			else {
-				x := c / b
-			}
+		} else {
+				x = c / b
 		}
 		avg += x
+	}
 
 	average := avg / 3
 	probability := math.Min(math.Abs(float64(average)), 1)
-	}
 
-return probability > 0.5, probability
+	return probability > 0.5, probability
+}
+
+func analyzeBytes(b []byte) bool {
+	r := bytes.NewReader(b)
+	im, _, err := image.Decode(r)
+	if err != nil {
+		return false
+	}
+	bounds := im.Bounds()
+
+	result, _ := analyzeSamplePairs(im, bounds)
+	return result
 }
 
 func main() {
-
 	// Ask the user what image they would like to analyze
 	fmt.Println("Enter the name of the image you would like to analyze: ")
 	imageName := ""
@@ -154,8 +173,7 @@ func main() {
 	println("Probability of being a stego image:", probability)
 	if result {
 		fmt.Println("This is probably a stego image.")
-	}
-	else {
+	} else {
 		fmt.Println("This is probably not a stego image.")
 	}
 }
