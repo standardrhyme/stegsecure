@@ -1,3 +1,6 @@
+import sys
+import os 
+
 # onlyLsb returns the LSB of x
 def onlyLsb(x):
     return x & 1
@@ -95,9 +98,14 @@ def analyzeSamplePairs(image):
 
 def main():
     from PIL import Image
-
     # Ask the user what image they would like to analyze
-    imagename = input("Enter the name of the image you would like to analyze: ")
+    # print("FILE NAME: ", sys.argv[1])
+    if os.path.isfile(sys.argv[1]) == False:
+        print("The file does not exist.")
+        sys.exit(1)
+    imagename = sys.argv[1]
+
+
 
     #Open the image
     with Image.open(imagename) as im:
@@ -106,8 +114,10 @@ def main():
         print("Probability of being a stego image:", probability)
         if result:
             print("This is probably a stego image.")
+            print("TRUE")
         else:
             print("This is probably not a stego image.")
+            print("FALSE")
 
 if __name__ == "__main__":
     main()

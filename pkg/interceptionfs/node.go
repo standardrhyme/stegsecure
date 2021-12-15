@@ -15,6 +15,12 @@ func (i *Inum) Increment() Inum {
 	return temp
 }
 
+func (i *Inum) Decrement() Inum {
+	temp := *i
+	*i = temp - 1
+	return temp
+}
+
 type UpdateTime uint8
 
 const (
@@ -36,11 +42,14 @@ type Node interface {
 	Parent() *Dir
 	SetParent(newDir *Dir)
 	GetNode() (*NodeAttr, error)
+	GetRelPath() string
+	GetRealPath() string
+	Passthrough() bool
 }
 
 // NodeAttr stores the attributes of a node.
 type NodeAttr struct {
-	fs *FS
+	fs   *FS
 	attr fuse.Attr
 }
 

@@ -40,4 +40,6 @@ var _ = fs.NodeOpener(&File{})
 
 var _ = fs.Handle(&FileHandle{})
 var _ = fs.HandleReader(&FileHandle{})
+var _ = fs.HandleReadAller(&FileHandle{})
 var _ = fs.HandleWriter(&FileHandle{})
+var _ = fs.HandleReleaser(&FileHandle{})
