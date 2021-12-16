@@ -1,18 +1,14 @@
-package main
+package sanitize
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
-	_ "image/jpeg"
 	"image/png"
 	"os"
-	"reflect"
 )
-
-var sampleRGBA image.RGBA
-var sampleYCbCr image.YCbCr
 
 type CleanImg struct {
 	image.Image
@@ -29,34 +25,80 @@ func (m *CleanImg) Set(x, y int, c color.Color) {
 
 func (m *CleanImg) At(x, y int) color.Color {
 	// Explicitly changed part: custom colors of the changed pixels:
-	if c := m.custom[image.Point{X: x, Y: y}]; c != nil {
+	if c, ok := m.custom[image.Point{X: x, Y: y}]; ok {
 		return c
 	}
 	// Unchanged part: colors of the original image:
 	return m.Image.At(x, y)
 }
 
-func Sanitize(path string) error {
+func SanitizeImage(old image.Image) (image.Image, error) {
+	clean := NewCleanImg(old)
+	bound := old.Bounds()
+
+	var pixelFormat int
+	switch old.(type) {
+	case *image.RGBA:
+		pixelFormat = 1
+	case *image.YCbCr:
+		pixelFormat = 2
+	default:
+		return nil, fmt.Errorf("Unsupported Format")
+	}
+
+	for y := bound.Min.Y; y < bound.Max.Y; y++ {
+		SanitizeRow(bound.Min.X, bound.Max.X, y, old, *clean, pixelFormat)
+	}
+
+	return clean, nil
+}
+
+func SanitizeBytes(data []byte, format string) []byte {
+	var out bytes.Buffer
+	imgReader := bytes.NewReader(data)
+
+	old, format, err := image.Decode(imgReader)
+	if err != nil {
+		return data
+	}
+
+	clean, err := SanitizeImage(old)
+	if err != nil {
+		return data
+	}
+
+	if format == "png" {
+		err = png.Encode(&out, clean)
+	} else if format == "jpeg" {
+		err = jpeg.Encode(&out, clean, nil)
+	} else {
+		println("Unsupported format")
+		return data
+	}
+
+	if err != nil {
+		return data
+	}
+
+	return out.Bytes()
+}
+
+func SanitizePath(path string) error {
 	pic, err := os.Open(path)
 	if err != nil {
 		return err
 	}
+
 	old, format, err := image.Decode(pic)
-	clean := NewCleanImg(old)
-	bound := old.Bounds()
-	var pixelFormat int
-	switch reflect.TypeOf(old) {
-	case reflect.TypeOf(&sampleRGBA):
-		pixelFormat = 1
-	case reflect.TypeOf(&sampleYCbCr):
-		pixelFormat = 2
-	default:
-		fmt.Println("Unsupported Format")
-		return nil
+	if err != nil {
+		return err
 	}
-	for y := bound.Min.Y; y < bound.Max.Y; y++ {
-		go SanitizeRow(bound.Min.X, bound.Max.X, y, old, *clean, pixelFormat)
+
+	clean, err := SanitizeImage(old)
+	if err != nil {
+		return err
 	}
+
 	out, err := os.Create(path)
 	if err != nil {
 		return err
@@ -66,14 +108,14 @@ func Sanitize(path string) error {
 	} else if format == "jpeg" {
 		err = jpeg.Encode(out, clean, nil)
 	} else {
-		println("Unsupported format")
-		return nil
+		return fmt.Errorf("Unsupported format")
 	}
+
 	if err != nil {
 		return err
 	}
-	err = pic.Close()
-	return err
+
+	return pic.Close()
 }
 
 func SanitizeRow(min int, max int, y int, old image.Image, clean CleanImg, pixelFormat int) {
@@ -90,13 +132,9 @@ func SanitizeRow(min int, max int, y int, old image.Image, clean CleanImg, pixel
 }
 
 func SanitizePixelRGBA(x int, y int, old image.Image, clean CleanImg) {
-	if reflect.TypeOf(old) == reflect.TypeOf(&sampleRGBA) {
-		pixel := old.At(x, y)
-		r, g, b, a := pixel.RGBA()
-		clean.Set(x, y, color.RGBA{R: uint8(2 * (r / 2)), G: uint8(2 * (g / 2)), B: uint8(2 * (b / 2)), A: uint8(a)})
-	} else if reflect.TypeOf(old) == reflect.TypeOf(&sampleYCbCr) {
-
-	}
+	pixel := old.At(x, y)
+	r, g, b, a := pixel.RGBA()
+	clean.Set(x, y, color.RGBA{R: uint8(2 * (r / 2)), G: uint8(2 * (g / 2)), B: uint8(2 * (b / 2)), A: uint8(a)})
 }
 
 func SanitizePixelYCbCr(x int, y int, old image.Image, clean CleanImg) {

@@ -1,4 +1,4 @@
-package main
+package steganalysis
 
 import (
 	"bytes"
@@ -8,6 +8,10 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
+
+	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
+	"github.com/standardrhyme/stegsecure/pkg/sanitize"
 )
 
 // onlyLsb returns the LSB of x
@@ -21,7 +25,7 @@ func exceptLsb(x uint32) uint32 {
 }
 
 // updateParams updates the provided parameters, depending on the LSB and MSBs
-func updateParams(u uint32, v uint32, params [4]float64) {
+func updateParams(u uint32, v uint32, params *[4]float64) {
 	uMsb := exceptLsb(u)
 	uLsb := onlyLsb(u)
 	vMsb := exceptLsb(v)
@@ -65,7 +69,7 @@ func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) 
 	avg := float64(0)
 	for color := 0; color < 3; color++ {
 		//                   W X Y Z
-		params := [4]float64{0,0,0,0}
+		params := &[4]float64{0,0,0,0}
 		P := float64(0)
 
 		// Compute horizontal pairs
@@ -100,7 +104,7 @@ func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) 
 		Y := params[2]
 		Z := params[3]
 
-		a := (W+Z) / 2.0
+		a := (W+Z) / 2
 		b := (2*X) - P
 		c := Y-X
 
@@ -122,8 +126,9 @@ func analyzeSamplePairs(im image.Image, bounds image.Rectangle) (bool, float64) 
 				x = negRoot
 			}
 		} else {
-				x = c / b
+			x = c / b
 		}
+
 		avg += x
 	}
 
@@ -137,12 +142,44 @@ func analyzeBytes(b []byte) bool {
 	r := bytes.NewReader(b)
 	im, _, err := image.Decode(r)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 	bounds := im.Bounds()
 
 	result, _ := analyzeSamplePairs(im, bounds)
 	return result
+}
+
+func AnalyzeGo(n interceptionfs.Node) {
+	fh, ok := n.(*interceptionfs.FileHandle)
+	if !ok {
+		// Not a file handle
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("===========")
+	fmt.Println("FILE NAME: ", fh.Name())
+
+	if !strings.HasSuffix(fh.Name(), ".png") {
+		fh.File.Release()
+		return
+	}
+
+	data, err := fh.InternalReadAll()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	if analyzeBytes(data) {
+		fmt.Println("SANITIZE")
+		cleaned := sanitize.SanitizeBytes(data, "png")
+		fh.InternalOverwrite(cleaned)
+	}
+
+	fh.File.Release()
 }
 
 func main() {

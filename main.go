@@ -15,7 +15,7 @@ var (
 
 func testInterception() {
 	// Initialize the filesystem
-	fs, err := interceptionfs.Init(steganalysis.Analyze)
+	fs, err := interceptionfs.Init(steganalysis.AnalyzeGo)
 	if err != nil {
 		log.Fatal(err)
 	}

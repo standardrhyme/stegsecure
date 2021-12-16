@@ -72,6 +72,14 @@ func (fh *FileHandle) ReadAll(ctx context.Context) ([]byte, error) {
 	return nil, syscall.EPERM
 }
 
+func (fh *FileHandle) InternalOverwrite(data []byte) {
+	if fh.passthrough {
+		return
+	}
+
+	fh.data = data
+}
+
 // Write modifies the contents of the file.
 func (fh *FileHandle) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.WriteResponse) error {
 	if fh.fs.RemoveIfNotExist(fh) {

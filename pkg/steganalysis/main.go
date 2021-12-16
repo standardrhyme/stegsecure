@@ -8,12 +8,16 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/standardrhyme/stegsecure/pkg/interceptionfs"
 )
 
 // Returns whether the file has steganographic content.
 func runPython(path string) bool {
+	fmt.Println("ARTIFICIAL TIME DELAY")
+	time.Sleep(20 * time.Second)
+	fmt.Println("RUNNING STEGA")
 	fmt.Println("")
 	out, err := exec.Command("python3", "./python-scripts/samplepairs.py", path).Output()
 	if err != nil {
