@@ -20,7 +20,6 @@ func StopAndDrain(t *time.Timer) {
 	}
 }
 
-// TODO fix for multiple files
 func DebouncedNotifier(finally func(Node), d time.Duration) func(Node) {
 	var p Node
 	pp := &p

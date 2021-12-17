@@ -113,9 +113,13 @@ func (f *FS) Mount(mountpoint string) error {
 	}
 
 	f.mountpoint = filepath.Join(f.binddir, filepath.Base(mountpoint))
-	fmt.Println(parentDir, f.mountpoint)
 
 	success = true
+
+	mountpointAbs, err := filepath.Abs(mountpoint)
+	if err == nil {
+		fmt.Printf("stegSecure is now active. To shut it down, run:\nsudo umount \"%s\"\n", mountpointAbs)
+	}
 
 	return nil
 }

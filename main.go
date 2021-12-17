@@ -13,7 +13,7 @@ var (
 	DEBUG = false
 )
 
-func testInterception() {
+func testInterception(path string) {
 	// Initialize the filesystem
 	fs, err := interceptionfs.Init(steganalysis.AnalyzeGo)
 	if err != nil {
@@ -27,7 +27,7 @@ func testInterception() {
 	}
 
 	// Mount the filesystem to the Downloads folder
-	err = fs.Mount("testdir/Downloads")
+	err = fs.Mount(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +41,6 @@ func testInterception() {
 
 	defer fs.Close()
 
-	fmt.Println(fs)
 	err = <-errchan
 	if err != nil {
 		log.Fatal(err)
@@ -53,5 +52,10 @@ func main() {
 		log.Fatalln("Must be run as root!")
 	}
 
-	testInterception()
+	if (len(os.Args[1:]) < 1) {
+		fmt.Println("Mounting to testdir/Downloads. If you want to set the folder to mount to, use: sudo go run main.go MOUNTPATH")
+		testInterception("testdir/Downloads")
+	} else {
+		testInterception(os.Args[1])
+	}
 }
