@@ -1,4 +1,4 @@
-# stegsecure
+# stegSecure
 
 stegSecure is a software that runs alongside existing antivirus solutions to intercept new user files upon download, scans the images for 
 LSB-steganography, and santizes them of hidden information.
@@ -32,9 +32,11 @@ Specifies the directory to mount over.
 ![image](https://user-images.githubusercontent.com/15258611/146490285-fa9c339a-05b1-45e5-8569-bfd2281752a2.png)
 
 
-
 ## Workflow
 ![image](https://user-images.githubusercontent.com/15258611/146490879-f082af56-f9eb-4796-a78e-4132164469ba.png)
+
+## Features
+![image](https://user-images.githubusercontent.com/15258611/146491064-020abfb7-18a4-4184-b318-78bc300a2264.png)
 
 
 ## Custom Data Structures
