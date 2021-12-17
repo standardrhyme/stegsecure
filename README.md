@@ -48,7 +48,8 @@ Specifies the directory to mount over.
 #### File Interception Layers
 ![image](https://user-images.githubusercontent.com/15258611/146491332-b8787b4d-27c8-4314-a511-b8d13567b77e.png)
 
-#### File Sanitation via Bit Masking: The LSB values of the steganographic image on top are all switched to 0, rendering the cleaned image below
+#### File Sanitation via Bit Masking: 
+The LSB values of the steganographic image on top are all switched to 0, rendering the cleaned image below
 ![image](https://user-images.githubusercontent.com/15258611/146491529-186164d2-1f7c-4061-b92d-b556101fcb94.png)
 
 
