@@ -17,7 +17,7 @@ Clone the following git repository with `git clone https://github.com/standardrh
 ## Workflow
 
 ## Custom Data Structures
-```Python
+```go
 
 type FS struct {
 	Debug      func(msg interface{})
