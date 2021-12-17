@@ -82,7 +82,7 @@ type FileHandle struct {
 	*File
 	passthroughHandle *os.File
 }
-
+```
 ## Exit Codes 
 - `0`: Successful
 - `1`: Incorrect command line input format
