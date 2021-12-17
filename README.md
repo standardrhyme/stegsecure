@@ -130,7 +130,7 @@ type FileHandle struct {
 
 
 ## References
-Dumitrescu, Sorina, Xiaolin Wu, and Zhe Wang (2003). “Detection of LSB steganography via sample pair analysis”. In: Signal Processing, IEEE Transactions on 51.7, pp. 1995–2007.
+[Dumitrescu, Sorina, Xiaolin Wu, and Zhe Wang (2003). “Detection of LSB steganography via sample pair analysis”. In: Signal Processing, IEEE Transactions on 51.7, pp. 1995–2007.](https://link.springer.com/chapter/10.1007/3-540-36415-3_23)
 
 [FUSE](https://www.kernel.org/doc/html/latest/filesystems/fuse.html) was used to build our virtual file interception feature without touching the kernel code.
 
