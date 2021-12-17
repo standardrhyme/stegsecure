@@ -32,13 +32,16 @@ Specifies the directory to mount over.
 ![image](https://user-images.githubusercontent.com/15258611/146490285-fa9c339a-05b1-45e5-8569-bfd2281752a2.png)
 
 
-## Workflow
+## Diagrams
 
 #### General Workflow
 ![image](https://user-images.githubusercontent.com/15258611/146490879-f082af56-f9eb-4796-a78e-4132164469ba.png)
 
 #### File Interception Layers
 ![image](https://user-images.githubusercontent.com/15258611/146491332-b8787b4d-27c8-4314-a511-b8d13567b77e.png)
+
+#### File Sanitation via Bit Masking
+![image](https://user-images.githubusercontent.com/15258611/146491529-186164d2-1f7c-4061-b92d-b556101fcb94.png)
 
 
 ## Features
