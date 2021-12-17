@@ -13,7 +13,7 @@ Clone the following git repository with `git clone https://github.com/standardrh
 Change the current directory into the recently cloned `stegsecure` folder. Start stegSecure with `sudo go run main.go`.
 
 #### Step 3: Download an image 
-Download an image from an Internet browser. stegSecure will automatically intercept, scan, and sanitize the file.
+Download an image from an Internet browser. stegSecure will automatically intercept, scan, and sanitize the file if needed.
 
 #### Step 4: Terminate stegSecure
 In a separate Terminal, run `sudo umount`. 
