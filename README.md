@@ -1,7 +1,9 @@
 # stegSecure
 
 stegSecure is a software that runs alongside existing antivirus solutions to intercept new user files upon download, scans the images for 
-LSB-steganography, and santizes them of hidden information.
+LSB-steganography, and santizes them of hidden information if it is found to be steganographic.
+
+It implements the Sample Pairs steganalysis algorithm, which returns a probability that a given image is steganographic (Dumitrescu 2003). stegSecure sanitizes the image if this probability is >50%.
 
 _**This version of stegSecure must be run on the Linux OS **_
 
@@ -125,4 +127,8 @@ type FileHandle struct {
 - `0`: Successful
 - `1`: Incorrect command line input format
 - `2`: External package function error
+
+
+## References
+Dumitrescu, Sorina, Xiaolin Wu, and Zhe Wang (2003). “Detection of LSB steganography via sample pair analysis”. In: Signal Processing, IEEE Transactions on 51.7, pp. 1995–2007.
 
