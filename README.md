@@ -1,6 +1,6 @@
 # stegSecure
 
-stegSecure is a software that runs alongside existing antivirus solutions to intercept new user files upon download, scans the images for 
+stegSecure is a software that intercepts new user files upon download, scans the images for 
 LSB-steganography, and santizes them of hidden information if they are found to be steganographic.
 
 stegSecure implements the Sample Pairs steganalysis algorithm, which returns a probability that a given image is steganographic (Dumitrescu 2002). stegSecure sanitizes the image if this probability is >50%.
