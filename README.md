@@ -12,18 +12,19 @@ _**This version of stegSecure must be run on the Linux OS **_
 Clone the following git repository with `git clone https://github.com/standardrhyme/stegsecure`.
 
 #### Step 2: Begin stegSecure 
-Change the current directory into the recently cloned `stegsecure` folder. Start stegSecure with `sudo go run main.go`.
+Change the current directory into the recently cloned `stegsecure` folder. Start stegSecure with `sudo go run main.go [MOUNTPATH]`.
 
 #### Step 3: Download an image 
 Download an image from an Internet browser. stegSecure will automatically intercept, scan, and sanitize the file if needed.
 
 #### Step 4: Terminate stegSecure
-In a separate Terminal, run `sudo umount`. 
+In a separate Terminal, run `sudo umount MOUNTPATH`. 
 
 ## Options
 
-**[-datapath]**
-Specifies the directory to mount over.
+**[MOUNTPATH]**
+
+Specifies the directory to mount over. This should be your Downloads folder, but can be any directory. If unspecified, it will default to the `testdir/Downloads` folder within the respository.
 
 ## Screenshots
 
