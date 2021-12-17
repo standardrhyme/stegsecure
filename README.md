@@ -15,8 +15,8 @@ Change the current directory into the recently cloned `stegsecure` folder. Start
 #### Step 3: Download an image 
 Download an image from an Internet browser. stegSecure will automatically intercept, scan, and sanitize the file.
 
-#### Step 4: To shut stegSecure down
-Run `sudo umount`. 
+#### Step 4: Terminate stegSecure
+In a separate Terminal, run `sudo umount`. 
 
 ## Options
 
@@ -30,6 +30,12 @@ Specifies the directory to mount over.
 
 #### Running stegSecure with specified directory: 
 ![image](https://user-images.githubusercontent.com/15258611/146490285-fa9c339a-05b1-45e5-8569-bfd2281752a2.png)
+
+#### Sample output when a steganographic (samplestego.png) and non-steganographic (samplesmaller.png) image are downloaded:
+![image](https://user-images.githubusercontent.com/15258611/146494555-9c62a62f-d306-4aaa-ba48-3c64d74af7d9.png)
+
+#### Terminating stegSecure:
+![image](https://user-images.githubusercontent.com/15258611/146494836-0a66799e-32ac-4c9d-a0a9-e6da790da00c.png)
 
 
 ## Diagrams
