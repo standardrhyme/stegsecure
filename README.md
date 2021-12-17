@@ -33,7 +33,13 @@ Specifies the directory to mount over.
 
 
 ## Workflow
+
+#### General Workflow
 ![image](https://user-images.githubusercontent.com/15258611/146490879-f082af56-f9eb-4796-a78e-4132164469ba.png)
+
+#### File Interception Layers
+![image](https://user-images.githubusercontent.com/15258611/146491332-b8787b4d-27c8-4314-a511-b8d13567b77e.png)
+
 
 ## Features
 ![image](https://user-images.githubusercontent.com/15258611/146491151-80a38b3f-a729-4902-837d-90a2defa54bb.png)
