@@ -1,18 +1,19 @@
 # stegsecure
 
-stegSecure is a software that runs alongside existing antivirus solutions to detect
-LSB-steganography images among new user files.
+stegSecure is a software that runs alongside existing antivirus solutions to intercept new user files upon download, scans the images for 
+LSB-steganography, and santizes them of hidden information.
 
 ## How to Run 
 #### Step 1: Clone Git Repository
 Clone the following git repository with `git clone https://github.com/standardrhyme/stegsecure`.
 
-#### Step 2:
+#### Step 2: Begin stegSecure 
+Change the current directory into the recently cloned `stegsecure` folder. Start stegSecure with `go run main.go`.
 
-#### Step 3: 
+#### Step 3: Download an image 
+Download an image from an Internet browser.
 
-
-## Screenshot
+## Screenshots
 
 ## Workflow
 
