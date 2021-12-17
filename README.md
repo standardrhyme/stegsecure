@@ -15,9 +15,27 @@ Change the current directory into the recently cloned `stegsecure` folder. Start
 #### Step 3: Download an image 
 Download an image from an Internet browser.
 
+#### Step 4: To shut stegSecure down
+Run `sudo umount`. 
+
+## Options
+
+**[-datapath]**
+Specifies the directory to mount over.
+
 ## Screenshots
 
+#### Running stegSecure without arguments:
+![image](https://user-images.githubusercontent.com/15258611/146490512-059e2f48-a331-49b0-9e8b-5bcb0b29b063.png)
+
+#### Running stegSecure with specified directory: 
+![image](https://user-images.githubusercontent.com/15258611/146490285-fa9c339a-05b1-45e5-8569-bfd2281752a2.png)
+
+
+
 ## Workflow
+![image](https://user-images.githubusercontent.com/15258611/146490879-f082af56-f9eb-4796-a78e-4132164469ba.png)
+
 
 ## Custom Data Structures
 ```go
