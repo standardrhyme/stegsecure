@@ -3,7 +3,7 @@
 stegSecure is a software that runs alongside existing antivirus solutions to intercept new user files upon download, scans the images for 
 LSB-steganography, and santizes them of hidden information.
 
-*** This version of stegSecure must be run on the Linux OS *** 
+***** This version of stegSecure must be run on the Linux OS *** **__
 
 ## How to Run 
 #### Step 1: Clone Git Repository
